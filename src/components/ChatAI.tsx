@@ -1,4 +1,4 @@
-import {BotMessageSquare, X} from "lucide-react";
+import {BotMessageSquare, Maximize, X} from "lucide-react";
 import {FC, useState, useRef} from "react";
 
 const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
@@ -39,7 +39,18 @@ const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
       {/* Header */}
       <div className="flex justify-between items-center p-4 border-b border-[#454545]">
         <h2 className="text-sm font-semibold">AI Chat</h2>
-        <X onClick={onClose} className="cursor-pointer hover:text-red-400" />
+        <div className="flex gap-2">
+           <Maximize
+            className="cursor-pointer hover:bg-[#454545]/50 rounded p-1 text-gray-300"
+            onClick={() => setWidth((prev) => (prev === window.innerWidth ? 320 : window.innerWidth))}
+          />
+          
+          <X
+            onClick={onClose}
+            className="cursor-pointer hover:bg-[#454545]/50 rounded p-1 text-gray-300"
+          />
+         
+        </div>
       </div>
 
       {/* Messages */}

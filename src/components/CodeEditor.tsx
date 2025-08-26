@@ -195,7 +195,7 @@ export function CodeEditor({
           <span>{file.name}</span>
           <X
             size={16}
-            className="text-red-500 cursor-pointer hover:bg-[#454545] rounded"
+            className="cursor-pointer hover:bg-[#454545] rounded text-gray-300"
             onClick={() => onDelete(file.id)}
           />
         </div>
