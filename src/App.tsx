@@ -27,7 +27,7 @@ import {
   Terminal,
   Trash2,
   RefreshCw,
-  X as CircleX,
+
 } from "lucide-react";
 
 type FileItem = {
@@ -468,13 +468,13 @@ function CodeEditor({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center p-2 border-b border-[#454545]">
-        <div className="flex items-center gap-2 p-1 bg-[#2d2d2d] border-b border-[#454545]">
+      <div className="flex justify-between items-center border-b border-[#454545]">
+        <div className="flex items-center gap-2 p-2 bg-[#2d2d2d] border-b border-[#454545]">
           {file.icon}
           <span>{file.name}</span>
-          <CircleX
+          <X
             size={16}
-            className="text-red-500 cursor-pointer"
+            className="text-red-500 cursor-pointer hover:bg-[#454545] rounded"
             onClick={() => onDelete(file.id)}
           />
         </div>
