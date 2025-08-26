@@ -1,38 +1,29 @@
-import React, {useState, useCallback, useRef, useEffect} from "react";
-import {transform} from "@babel/standalone";
-import Editor from "@monaco-editor/react";
+import {useState, useCallback} from "react";
+
 import {
   Files,
   File,
   Folder,
-  FolderOpen,
   Settings,
   Search,
   GitBranch,
-  Package,
-  FileJson,
-  FileType,
   FileCode,
-  ChevronDown,
   MoreVertical,
-  Plus,
   FolderPlus,
   FilePlus,
-  Edit2,
-  Save,
-  X,
-  Play,
-  Code2,
-  Split,
-  Terminal,
-  Trash2,
-  RefreshCw,
-
 } from "lucide-react";
-import { ContextMenu } from "./components/ContextMenu";
-import { CodeEditor } from "./components/CodeEditor";
-import { FileTreeItem } from "./components/FileTreeItem";
+import {ContextMenu} from "./components/ContextMenu";
+import {CodeEditor} from "./components/CodeEditor";
+import {FileTreeItem} from "./components/FileTreeItem";
 
+type FileItem = {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+  icon?: React.ReactNode;
+  content?: string;
+  children?: FileItem[];
+};
 
 function App() {
   const [fileStructure, setFileStructure] = useState<FileItem[]>([
