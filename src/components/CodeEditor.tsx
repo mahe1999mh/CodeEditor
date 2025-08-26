@@ -1,8 +1,8 @@
-import { transform } from "@babel/standalone";
-import { Editor } from "@monaco-editor/react";
-import { Code2, Play, RefreshCw, Save, Split, Terminal, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-
+import {transform} from "@babel/standalone";
+import {Editor} from "@monaco-editor/react";
+import {BotMessageSquare, Code2, Play, RefreshCw, Save, Split, Terminal, X} from "lucide-react";
+import {useCallback, useEffect, useState} from "react";
+import SideChat from "./ChatAI";
 
 type FileItem = {
   id: string;
@@ -30,6 +30,7 @@ export function CodeEditor({
   const [content, setContent] = useState(file.content || "");
   const [isEditing, setIsEditing] = useState(false);
   const [showCompiled, setShowCompiled] = useState(false);
+  const [isAiChat, setIsAiChat] = useState(false);
   const [compiledCode, setCompiledCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
@@ -154,6 +155,10 @@ export function CodeEditor({
     setIsEditing(false);
   };
 
+  const handleAiChat = () => {
+    setIsAiChat(true);
+  };
+
   const getLanguage = () => {
     const ext = file.name.split(".").pop();
     switch (ext) {
@@ -195,6 +200,16 @@ export function CodeEditor({
           />
         </div>
         <div className="flex gap-2">
+          <button
+            className={`p-1 hover:bg-[#454545] rounded flex items-center gap-1 text-sm ${
+              isAiChat ? "bg-[#454545]" : ""
+            }`}
+            onClick={handleAiChat}
+          >
+            <BotMessageSquare size={16} />
+            <span>AI Chat</span>
+          </button>
+
           {isJsTs && (
             <>
               <button
@@ -316,6 +331,9 @@ export function CodeEditor({
           </div>
         </div>
       )}
+      {isAiChat && <SideChat  onClose={() => setIsAiChat(false)} />}
     </div>
   );
 }
+
+
