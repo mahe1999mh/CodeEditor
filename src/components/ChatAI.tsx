@@ -54,20 +54,17 @@ const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
                   {
                     text:
                       `${userInput} — give me JavaScript code in 3 lines. Format it like this:\n\n` +
-                      `// Example JavaScript code\n` +
-                      `function greet(name) {\n` +
-                      `  console.log("Hello, " + name + "!");\n` +
-                      `}\n` +
-                      `\n` +
-                      `greet("World");\n` +
-                      `\n` +
-                      `// Test different console methods\n` +
-                      `console.info("This is an info message");\n` +
-                      `console.warn("This is a warning");\n` +
-                      `console.error("This is an error");\n` +
-                      `\n` +
-                      `// Test object logging\n` +
-                      `console.log({ name: "John", age: 30 });`,
+                      "Take the following JavaScript code and return it as a string formatted with `\\n` line breaks and string concatenation (using backticks and +). For example:\n\n" +
+                      "// Example JavaScript code\n" +
+                      "function greet(name) {\n" +
+                      '  console.log("Hello, " + name + "!");\n' +
+                      "}\n\n" +
+                      "Should be returned as:\n\n" +
+                      "`// Example JavaScript code\\n` +\n" +
+                      "`function greet(name) {\\n` +\n" +
+                      '`  console.log("Hello, " + name + "!");\\n` +\n' +
+                      "`}\\n`\n\n" +
+                      "Now, format the following code:",
                   },
                 ],
               },
