@@ -1,7 +1,7 @@
+import { transform } from "@babel/standalone";
 import { Editor } from "@monaco-editor/react";
 import { Code2, Play, RefreshCw, Save, Split, Terminal, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { transform } from "typescript";
 
 
 type FileItem = {
@@ -34,6 +34,8 @@ export function CodeEditor({
   const [error, setError] = useState<string | null>(null);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+
+  console.log(isRunning, "isRunning");
 
   const compileCode = useCallback(
     (sourceCode: string) => {
@@ -69,9 +71,10 @@ export function CodeEditor({
 
   const runCode = useCallback(() => {
     setIsRunning(true);
-    setConsoleOutput([]);
+    // setConsoleOutput([]);
 
     const compiledSource = compileCode(content);
+    console.log(compiledSource, content, "compiledSource");
     if (!compiledSource) {
       setIsRunning(false);
       return;
