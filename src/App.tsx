@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { transform } from "@babel/standalone";
+import React, {useState, useCallback, useRef, useEffect} from "react";
+import {transform} from "@babel/standalone";
 import Editor from "@monaco-editor/react";
 import {
   Files,
@@ -27,6 +27,7 @@ import {
   Terminal,
   Trash2,
   RefreshCw,
+  X as CircleX,
 } from "lucide-react";
 
 type FileItem = {
@@ -68,7 +69,7 @@ function ContextMenu({
       <div className="fixed inset-0" onClick={onClose} />
       <div
         className="fixed bg-[#252526] border border-[#454545] rounded shadow-lg py-1 z-50"
-        style={{ left: x, top: y }}
+        style={{left: x, top: y}}
       >
         <button
           className="w-full px-4 py-1 text-left hover:bg-[#37373d] flex items-center gap-2"
@@ -144,7 +145,7 @@ function FileTreeItem({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY });
+    setContextMenu({x: e.clientX, y: e.clientY});
   };
 
   const handleRename = () => {
@@ -169,7 +170,7 @@ function FileTreeItem({
         className={`flex items-center py-1 hover:bg-[#37373d] cursor-pointer rounded group ${
           isSelected ? "bg-[#37373d]" : ""
         }`}
-        onClick={e => {
+        onClick={(e) => {
           e.stopPropagation();
           if (!isEditing) {
             onSelect(item);
@@ -179,7 +180,7 @@ function FileTreeItem({
           }
         }}
         onContextMenu={handleContextMenu}
-        style={{ paddingLeft: `${depth * 8}px` }}
+        style={{paddingLeft: `${depth * 8}px`}}
       >
         {hasChildren && (
           <ChevronDown
@@ -203,7 +204,7 @@ function FileTreeItem({
               ref={inputRef}
               type="text"
               value={editName}
-              onChange={e => setEditName(e.target.value)}
+              onChange={(e) => setEditName(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleRename}
               className="w-full bg-[#3c3c3c] text-sm px-1 rounded border border-[#007fd4] focus:outline-none"
@@ -219,7 +220,7 @@ function FileTreeItem({
               <>
                 <button
                   className="p-1 hover:bg-[#454545] rounded"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     onAddFile(item.id);
                   }}
@@ -228,7 +229,7 @@ function FileTreeItem({
                 </button>
                 <button
                   className="p-1 hover:bg-[#454545] rounded"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     onAddFolder(item.id);
                   }}
@@ -239,7 +240,7 @@ function FileTreeItem({
             )}
             <button
               className="p-1 hover:bg-[#454545] rounded"
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 setIsEditing(true);
               }}
@@ -248,7 +249,7 @@ function FileTreeItem({
             </button>
             <button
               className="p-1 hover:bg-[#454545] rounded text-red-400"
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item.id);
               }}
@@ -307,9 +308,11 @@ function FileTreeItem({
 function CodeEditor({
   file,
   onSave,
+  onDelete,
 }: {
   file: FileItem;
   onSave: (content: string) => void;
+  onDelete: (id: string) => void;
 }) {
   const [content, setContent] = useState(file.content || "");
   const [isEditing, setIsEditing] = useState(false);
@@ -364,12 +367,12 @@ function CodeEditor({
     // Create a custom console object
     const customConsole = {
       log: (...args: any[]) => {
-        setConsoleOutput(prev => [
+        setConsoleOutput((prev) => [
           ...prev,
           {
             type: "log",
             content: args
-              .map(arg =>
+              .map((arg) =>
                 typeof arg === "object"
                   ? JSON.stringify(arg, null, 2)
                   : String(arg)
@@ -380,33 +383,33 @@ function CodeEditor({
         ]);
       },
       error: (...args: any[]) => {
-        setConsoleOutput(prev => [
+        setConsoleOutput((prev) => [
           ...prev,
           {
             type: "error",
             content: args
-              .map(arg => (arg instanceof Error ? arg.message : String(arg)))
+              .map((arg) => (arg instanceof Error ? arg.message : String(arg)))
               .join(" "),
             timestamp: Date.now(),
           },
         ]);
       },
       warn: (...args: any[]) => {
-        setConsoleOutput(prev => [
+        setConsoleOutput((prev) => [
           ...prev,
           {
             type: "warn",
-            content: args.map(arg => String(arg)).join(" "),
+            content: args.map((arg) => String(arg)).join(" "),
             timestamp: Date.now(),
           },
         ]);
       },
       info: (...args: any[]) => {
-        setConsoleOutput(prev => [
+        setConsoleOutput((prev) => [
           ...prev,
           {
             type: "info",
-            content: args.map(arg => String(arg)).join(" "),
+            content: args.map((arg) => String(arg)).join(" "),
             timestamp: Date.now(),
           },
         ]);
@@ -466,9 +469,14 @@ function CodeEditor({
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center p-2 border-b border-[#454545]">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 p-1 bg-[#2d2d2d] border-b border-[#454545]">
           {file.icon}
           <span>{file.name}</span>
+          <CircleX
+            size={16}
+            className="text-red-500 cursor-pointer"
+            onClick={() => onDelete(file.id)}
+          />
         </div>
         <div className="flex gap-2">
           {isJsTs && (
@@ -520,10 +528,10 @@ function CodeEditor({
               height="100%"
               defaultLanguage={getLanguage()}
               value={content}
-              onChange={value => setContent(value || "")}
+              onChange={(value) => setContent(value || "")}
               theme="vs-dark"
               options={{
-                minimap: { enabled: false },
+                minimap: {enabled: false},
                 fontSize: 14,
                 lineNumbers: "on",
                 roundedSelection: false,
@@ -547,7 +555,7 @@ function CodeEditor({
                 value={error ? `// Error:\n${error}` : compiledCode}
                 theme="vs-dark"
                 options={{
-                  minimap: { enabled: false },
+                  minimap: {enabled: false},
                   fontSize: 14,
                   lineNumbers: "on",
                   readOnly: true,
@@ -611,18 +619,14 @@ function App() {
           content:
             '// Example JavaScript code\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n}\n\ngreet("World");\n\n// Test different console methods\nconsole.info("This is an info message");\nconsole.warn("This is a warning");\nconsole.error("This is an error");\n\n// Test object logging\nconsole.log({ name: "John", age: 30 });',
         },
-        {
-          id: "3",
-          name: "index.js",
-          type: "file",
-          icon: <FileCode size={16} className="text-yellow-500" />,
-          content:
-            '// Example JavaScript code\nfunction greet(name) {\n  console.log(`Hello, ${name}!`);\n}\n\ngreet("World");\n\n// Test different console methods\nconsole.info("This is an info message");\nconsole.warn("This is a warning");\nconsole.error("This is an error");\n\n// Test object logging\nconsole.log({ name: "John", age: 30 });',
-        },
       ],
     },
   ]);
-  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileItem | null>(
+    fileStructure[0]?.children ? fileStructure[0].children[0] : null
+  );
+
+  console.log(selectedFile, "selectedFile");
 
   const addItem = useCallback((parentId: string, type: "file" | "folder") => {
     const newId = Math.random().toString(36).substr(2, 9);
@@ -644,7 +648,7 @@ function App() {
     };
 
     const updateStructure = (items: FileItem[]): FileItem[] => {
-      return items.map(item => {
+      return items.map((item) => {
         if (item.id === parentId) {
           return {
             ...item,
@@ -661,39 +665,45 @@ function App() {
       });
     };
 
-    setFileStructure(prev => updateStructure(prev));
+    setFileStructure((prev) => updateStructure(prev));
   }, []);
 
   const deleteItem = useCallback(
-    (id: string) => {
-      const updateStructure = (items: FileItem[]): FileItem[] => {
-        return items.filter(item => {
-          if (item.id === id) {
-            return false;
-          }
-          if (item.children) {
-            return {
-              ...item,
-              children: updateStructure(item.children),
-            };
-          }
-          return true;
-        });
-      };
-
-      setFileStructure(prev => updateStructure(prev));
-      if (selectedFile?.id === id) {
-        setSelectedFile(null);
+    async (id: string) => {
+      function removeItem(items: FileItem[]): FileItem[] {
+        return items
+          .map((item) => {
+            if (item.id === id) {
+              return null;
+            }
+            if (item.children) {
+              return {
+                ...item,
+                children: removeItem(item.children),
+              };
+            }
+            return item;
+          })
+          .filter(Boolean) as FileItem[];
+      }
+      const result = await confirm("Do you really want to delete this file?");
+      if (result) {
+        setFileStructure((prev) => removeItem(prev));
+        if (selectedFile?.id === id) {
+          setSelectedFile(null);
+        }
       }
     },
     [selectedFile]
   );
-
+  const closeTab = useCallback(() => {
+    setSelectedFile(null);
+  }, []);
   const renameItem = useCallback((id: string, newName: string) => {
     const updateStructure = (items: FileItem[]): FileItem[] => {
-      return items.map(item => {
+      return items.map((item) => {
         if (item.id === id) {
-          return { ...item, name: newName };
+          return {...item, name: newName};
         }
         if (item.children) {
           return {
@@ -705,14 +715,14 @@ function App() {
       });
     };
 
-    setFileStructure(prev => updateStructure(prev));
+    setFileStructure((prev) => updateStructure(prev));
   }, []);
 
   const updateFileContent = useCallback((id: string, newContent: string) => {
     const updateStructure = (items: FileItem[]): FileItem[] => {
-      return items.map(item => {
+      return items.map((item) => {
         if (item.id === id) {
-          return { ...item, content: newContent };
+          return {...item, content: newContent};
         }
         if (item.children) {
           return {
@@ -724,7 +734,7 @@ function App() {
       });
     };
 
-    setFileStructure(prev => updateStructure(prev));
+    setFileStructure((prev) => updateStructure(prev));
   }, []);
 
   return (
@@ -779,8 +789,8 @@ function App() {
             <FileTreeItem
               key={`${item.name}-${index}`}
               item={item}
-              onAddFile={parentId => addItem(parentId, "file")}
-              onAddFolder={parentId => addItem(parentId, "folder")}
+              onAddFile={(parentId) => addItem(parentId, "file")}
+              onAddFolder={(parentId) => addItem(parentId, "folder")}
               onRename={renameItem}
               onDelete={deleteItem}
               onSelect={setSelectedFile}
@@ -795,7 +805,8 @@ function App() {
         {selectedFile?.type === "file" ? (
           <CodeEditor
             file={selectedFile}
-            onSave={content => updateFileContent(selectedFile.id, content)}
+            onSave={(content) => updateFileContent(selectedFile.id, content)}
+            onDelete={closeTab}
           />
         ) : (
           <div className="p-4">
