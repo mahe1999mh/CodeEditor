@@ -1,4 +1,4 @@
-import {BotMessageSquare, Maximize, X} from "lucide-react";
+import {BotMessageSquare, Maximize, Send, X} from "lucide-react";
 import {FC, useState, useRef} from "react";
 
 const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
@@ -148,20 +148,40 @@ const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
       </div>
 
       {/* Input bar */}
-      <div className="p-4 border-t border-[#454545] bg-[#2d2d2d]">
-        <input
-          type="text"
+      <div className="p-4 border-t border-[#454545] bg-[#2d2d2d] flex items-center">
+        <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = `${e.target.scrollHeight}px`; 
+          }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && input.trim()) {
+            if (e.key === "Enter" && !e.shiftKey && input.trim()) {
+              e.preventDefault();
               callGemini(input);
               setInput("");
             }
           }}
-          className="w-full p-2 bg-[#3a3a3a] border border-[#454545] rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-200 placeholder-gray-400"
-          placeholder="Type your message..."
+          className="flex-1 max-h-40 overflow-y-auto p-3 rounded-2xl bg-[#3a3a3a] border border-[#454545] 
+               text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 
+               focus:ring-blue-500 resize-none"
+          placeholder="Type a message... (Shift+Enter for new line)"
+          style={{width: `calc(${width}px - 4rem)`, minHeight: "44px"}}
         />
+
+        {/* Send button */}
+        <button
+          onClick={() => {
+            if (input.trim()) {
+              callGemini(input);
+              setInput("");
+            }
+          }}
+          className="ml-2 p-3 bg-blue-500 hover:bg-blue-600 rounded-full transition-colors"
+        >
+          <Send size={18} className="text-white" />
+        </button>
       </div>
     </div>
   );
