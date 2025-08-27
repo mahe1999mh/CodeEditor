@@ -1,4 +1,4 @@
-import {useState, useCallback} from "react";
+import {useState, useCallback, useRef} from "react";
 
 import {
   Files,
@@ -12,7 +12,6 @@ import {
   FolderPlus,
   FilePlus,
 } from "lucide-react";
-import {ContextMenu} from "./components/ContextMenu";
 import {CodeEditor} from "./components/CodeEditor";
 import {FileTreeItem} from "./components/FileTreeItem";
 
@@ -88,6 +87,33 @@ function App() {
 
     setFileStructure((prev) => updateStructure(prev));
   }, []);
+
+  const [width, setWidth] = useState(300);
+  const isResizing = useRef(false);
+
+  // --- Resize Logic ---
+  const startResize = () => {
+    isResizing.current = true;
+    document.addEventListener("mousemove", handleResize);
+    document.addEventListener("mouseup", stopResize);
+  };
+
+  const handleResize = (e: MouseEvent) => {
+    if (!isResizing.current) return;
+
+    const sidebarOffset = 50;
+    const newWidth = e.clientX - sidebarOffset;
+
+    if (newWidth > 200 && newWidth < 600) {
+      setWidth(newWidth);
+    }
+  };
+
+  const stopResize = () => {
+    isResizing.current = false;
+    document.removeEventListener("mousemove", handleResize);
+    document.removeEventListener("mouseup", stopResize);
+  };
 
   const deleteItem = useCallback(
     async (id: string) => {
@@ -180,7 +206,7 @@ function App() {
       </div>
 
       {/* Explorer Panel */}
-      <div className="w-[300px] bg-[#252526]">
+      <div className="bg-[#252526]">
         <div className="p-2 flex justify-between items-center">
           <div className="flex items-center">
             <span className="text-sm font-semibold uppercase">Explorer</span>
@@ -205,19 +231,28 @@ function App() {
         </div>
 
         {/* Project Tree */}
-        <div className="px-2">
-          {fileStructure.map((item, index) => (
-            <FileTreeItem
-              key={`${item.name}-${index}`}
-              item={item}
-              onAddFile={(parentId) => addItem(parentId, "file")}
-              onAddFolder={(parentId) => addItem(parentId, "folder")}
-              onRename={renameItem}
-              onDelete={deleteItem}
-              onSelect={setSelectedFile}
-              selectedId={selectedFile?.id || null}
-            />
-          ))}
+        <div className="relative h-full flex" style={{width: `${width}px`}}>
+          {/* File tree content */}
+          <div className="px-2 flex-1 overflow-y-auto">
+            {fileStructure.map((item, index) => (
+              <FileTreeItem
+                key={`${item.name}-${index}`}
+                item={item}
+                onAddFile={(parentId) => addItem(parentId, "file")}
+                onAddFolder={(parentId) => addItem(parentId, "folder")}
+                onRename={renameItem}
+                onDelete={deleteItem}
+                onSelect={setSelectedFile}
+                selectedId={selectedFile?.id || null}
+              />
+            ))}
+          </div>
+
+          {/* Resizer bar on the right */}
+          <div
+            onMouseDown={startResize}
+            className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500/30"
+          />
         </div>
       </div>
 
