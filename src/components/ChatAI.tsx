@@ -61,9 +61,8 @@ Give me JavaScript code in 3 lines. Format it like this:
 function greet(name) {
   console.log("Hello, " + name + "!");
 }
-
-Return it as a string with \`\\n\` line breaks and string concatenation using backticks. Now, format the following code:
 `;
+      // Return it as a string with \`\\n\` line breaks and string concatenation using backticks. Now, format the following code:
 
       // Call Gemini API
       const res = await fetch(
@@ -84,8 +83,9 @@ Return it as a string with \`\\n\` line breaks and string concatenation using ba
 
       // Extract AI response
       const aiReply =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "No response from AI";
+        data?.candidates?.[0]?.content?.parts?.[0]?.text
+          ?.replace(/^```(?:javascript)?\s*/, "")
+          ?.replace(/```$/, "") || "No response from AI";
 
       console.log(aiReply, selectedFile, "selectedFile");
 
