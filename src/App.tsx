@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import {CodeEditor} from "./components/CodeEditor";
 import {FileTreeItem} from "./components/FileTreeItem";
+import SideChat from "./components/ChatAI";
 
 type FileItem = {
   id: string;
@@ -45,6 +46,7 @@ function App() {
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(
     fileStructure[0]?.children ? fileStructure[0].children[0] : null
   );
+  const [isAiChat, setIsAiChat] = useState(false);
 
   console.log(selectedFile, "selectedFile");
 
@@ -263,6 +265,8 @@ function App() {
             file={selectedFile}
             onSave={(content) => updateFileContent(selectedFile.id, content)}
             onDelete={closeTab}
+            isAiChat={isAiChat}
+            setIsAiChat={setIsAiChat}
           />
         ) : (
           <div className="p-4">
@@ -270,6 +274,8 @@ function App() {
           </div>
         )}
       </div>
+      {isAiChat && <SideChat onClose={() => setIsAiChat(false)} selectedFile={selectedFile} setSelectedFile={setSelectedFile} setFileStructure={setFileStructure}/>}
+
     </div>
   );
 }

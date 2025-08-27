@@ -1,8 +1,16 @@
 import {transform} from "@babel/standalone";
 import {Editor} from "@monaco-editor/react";
-import {BotMessageSquare, Code2, Play, RefreshCw, Save, Split, Terminal, X} from "lucide-react";
+import {
+  BotMessageSquare,
+  Code2,
+  Play,
+  RefreshCw,
+  Save,
+  Split,
+  Terminal,
+  X,
+} from "lucide-react";
 import {useCallback, useEffect, useState} from "react";
-import SideChat from "./ChatAI";
 
 type FileItem = {
   id: string;
@@ -22,21 +30,28 @@ export function CodeEditor({
   file,
   onSave,
   onDelete,
+  isAiChat,
+  setIsAiChat,
 }: {
   file: FileItem;
   onSave: (content: string) => void;
   onDelete: (id: string) => void;
+  setIsAiChat: (isAiChat: boolean) => void;
+  isAiChat: boolean;
 }) {
   const [content, setContent] = useState(file.content || "");
   const [isEditing, setIsEditing] = useState(false);
   const [showCompiled, setShowCompiled] = useState(false);
-  const [isAiChat, setIsAiChat] = useState(false);
   const [compiledCode, setCompiledCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
   const [isRunning, setIsRunning] = useState(false);
 
   console.log(isRunning, "isRunning");
+
+  useEffect(() => {
+    setContent(file.content || "");
+  }, [file.content]);
 
   const compileCode = useCallback(
     (sourceCode: string) => {
@@ -155,10 +170,6 @@ export function CodeEditor({
     setIsEditing(false);
   };
 
-  const handleAiChat = () => {
-    setIsAiChat(true);
-  };
-
   const getLanguage = () => {
     const ext = file.name.split(".").pop();
     switch (ext) {
@@ -204,7 +215,7 @@ export function CodeEditor({
             className={`p-1 hover:bg-[#454545] rounded flex items-center gap-1 text-sm ${
               isAiChat ? "bg-[#454545]" : ""
             }`}
-            onClick={handleAiChat}
+            onClick={() => setIsAiChat(true)}
           >
             <BotMessageSquare size={16} />
             <span>AI Chat</span>
@@ -331,9 +342,6 @@ export function CodeEditor({
           </div>
         </div>
       )}
-      {isAiChat && <SideChat  onClose={() => setIsAiChat(false)} />}
     </div>
   );
 }
-
-

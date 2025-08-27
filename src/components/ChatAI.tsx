@@ -1,7 +1,13 @@
 import {BotMessageSquare, Maximize, Send, X} from "lucide-react";
 import {FC, useState, useRef} from "react";
+import {FileItem} from "./types";
 
-const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
+const SideChat: FC<{
+  onClose: () => void;
+  selectedFile: any;
+  setSelectedFile: (file: any) => void;
+  setFileStructure: any;
+}> = ({onClose, selectedFile, setSelectedFile, setFileStructure}) => {
   const [width, setWidth] = useState(320);
   const isResizing = useRef(false);
 
@@ -35,10 +41,31 @@ const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
 
   // --- Gemini API Call ---
   async function callGemini(userInput: string) {
-    // add user message to UI
+    if (!userInput.trim()) return;
+
+    // Add user message
     setMessages((prev) => [...prev, {role: "user", text: userInput}]);
 
+    // Show temporary "Typing..." message
+    setMessages((prev) => [...prev, {role: "ai", text: "Typing..."}]);
+
     try {
+      // Prepare the prompt
+      const prompt = `
+User input: ${userInput}
+Selected file content: ${selectedFile?.content || ""}
+
+Give me JavaScript code in 3 lines. Format it like this:
+
+// Example JavaScript code
+function greet(name) {
+  console.log("Hello, " + name + "!");
+}
+
+Return it as a string with \`\\n\` line breaks and string concatenation using backticks. Now, format the following code:
+`;
+
+      // Call Gemini API
       const res = await fetch(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
         {
@@ -48,43 +75,49 @@ const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
             "X-goog-api-key": API_KEY,
           },
           body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text:
-                      `${userInput} — give me JavaScript code in 3 lines. Format it like this:\n\n` +
-                      "Take the following JavaScript code and return it as a string formatted with `\\n` line breaks and string concatenation (using backticks and +). For example:\n\n" +
-                      "// Example JavaScript code\n" +
-                      "function greet(name) {\n" +
-                      '  console.log("Hello, " + name + "!");\n' +
-                      "}\n\n" +
-                      "Should be returned as:\n\n" +
-                      "`// Example JavaScript code\\n` +\n" +
-                      "`function greet(name) {\\n` +\n" +
-                      '`  console.log("Hello, " + name + "!");\\n` +\n' +
-                      "`}\\n`\n\n" +
-                      "Now, format the following code:",
-                  },
-                ],
-              },
-            ],
+            contents: [{parts: [{text: prompt}]}],
           }),
         }
       );
 
       const data = await res.json();
-      const aiReply =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-        " No response from AI";
 
-      // add AI reply to UI
-      setMessages((prev) => [...prev, {role: "ai", text: aiReply}]);
+      // Extract AI response
+      const aiReply =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "No response from AI";
+
+      console.log(aiReply, selectedFile, "selectedFile");
+
+      // Update selected file content safely
+      setSelectedFile((prev) => (prev ? {...prev, content: aiReply} : null));
+      setFileStructure((prev) => {
+        const updateFile = (items: FileItem[]): FileItem[] => {
+          return items.map((item) => {
+            if (item.id === selectedFile?.id) {
+              return {...item, content: aiReply};
+            }
+            if (item.children) {
+              return {
+                ...item,
+                children: updateFile(item.children),
+              };
+            }
+            return item;
+          });
+        };
+        return updateFile(prev);
+      });
+
+      setMessages((prev) => [
+        ...prev.filter((m) => m.text !== "Typing..."),
+        {role: "ai", text: aiReply},
+      ]);
     } catch (err) {
       console.error(err);
       setMessages((prev) => [
-        ...prev,
-        {role: "ai", text: " Error connecting to Gemini API"},
+        ...prev.filter((m) => m.text !== "Typing..."),
+        {role: "ai", text: "Error connecting to Gemini API"},
       ]);
     }
   }
@@ -154,7 +187,7 @@ const SideChat: FC<{onClose: () => void}> = ({onClose}) => {
           onChange={(e) => {
             setInput(e.target.value);
             e.target.style.height = "auto";
-            e.target.style.height = `${e.target.scrollHeight}px`; 
+            e.target.style.height = `${e.target.scrollHeight}px`;
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey && input.trim()) {
