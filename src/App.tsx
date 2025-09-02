@@ -1,4 +1,4 @@
-import {useState, useCallback, useRef} from "react";
+import {useState, useCallback, useRef, useEffect} from "react";
 
 import {
   Files,
@@ -92,6 +92,19 @@ function App() {
 
   const [width, setWidth] = useState(300);
   const isResizing = useRef(false);
+
+  useEffect(() => {
+    fetch("http://localhost:9001/api/files", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: localStorage.getItem("Authorization"),
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   // --- Resize Logic ---
   const startResize = () => {
@@ -274,8 +287,14 @@ function App() {
           </div>
         )}
       </div>
-      {isAiChat && <SideChat onClose={() => setIsAiChat(false)} selectedFile={selectedFile} setSelectedFile={setSelectedFile} setFileStructure={setFileStructure}/>}
-
+      {isAiChat && (
+        <SideChat
+          onClose={() => setIsAiChat(false)}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+          setFileStructure={setFileStructure}
+        />
+      )}
     </div>
   );
 }

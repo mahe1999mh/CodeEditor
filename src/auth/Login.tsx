@@ -21,7 +21,7 @@ const Login = () => {
 
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const data = await res.json();
-      localStorage.setItem("Bearer", data?.token);
+      localStorage.setItem("Authorization", `Bearer ${data?.token}`);
       console.log("Login successful:", data?.token);
     } catch (err) {
       console.error("Login failed:", err);
